@@ -3,6 +3,11 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.impute import SimpleImputer
 import os
 
 # ------------------------
@@ -47,15 +52,19 @@ st.markdown("""
 st.title("🏎️ Sports Car Price Predictor")
 
 # ------------------------
-# Load the trained model
+# Load trained model
 # ------------------------
 model_path = "car_price_regression_model.pkl"  # must be in the same folder as app.py
 
 if os.path.exists(model_path):
-    model = joblib.load(model_path)
+    try:
+        model = joblib.load(model_path)
+    except Exception as e:
+        st.error(f"❌ Failed to load model: {e}")
+        st.stop()
 else:
-    st.error(f"❌ Model file not found at '{model_path}'. Please upload the trained model file.")
-    st.stop()  # Stop app if model is missing
+    st.error(f"❌ Model file not found at '{model_path}'. Please upload 'car_price_regression_model.pkl'.")
+    st.stop()
 
 # ------------------------
 # Sidebar instructions
@@ -98,7 +107,7 @@ if st.button("Predict Price"):
     })
     
     try:
-        price = model.predict(input_data)[0]
-        st.success(f"💰 Estimated Price: ${price:,.2f}")
+        predicted_price = model.predict(input_data)[0]
+        st.success(f"💰 Estimated Price: ${predicted_price:,.2f}")
     except Exception as e:
         st.error(f"❌ Prediction failed: {e}")
